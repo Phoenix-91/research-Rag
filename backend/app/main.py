@@ -11,6 +11,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import get_settings
 from app.core.logging import setup_logging, get_logger
 from app.api.v1 import health as health_router
+from app.api.v1 import papers as papers_router
+from app.api.v1 import chat as chat_router
+from app.api.v1 import models as models_router
+from app.db.postgres import init_db, close_db
 
 logger = get_logger(__name__)
 
@@ -21,7 +25,18 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     settings = get_settings()
     setup_logging("DEBUG" if settings.debug else "INFO")
     logger.info("PaperMind AI backend starting up")
+
+    # Initialize database tables
+    try:
+        await init_db()
+        logger.info("Database initialized")
+    except Exception as e:
+        logger.warning(f"Database init skipped (may not be available yet): {e}")
+
     yield
+
+    # Cleanup
+    await close_db()
     logger.info("PaperMind AI backend shutting down")
 
 
@@ -47,6 +62,9 @@ def create_app() -> FastAPI:
 
     # ── Routes ──────────────────────────────────────────────
     app.include_router(health_router.router, prefix="/api/v1", tags=["health"])
+    app.include_router(papers_router.router, prefix="/api/v1", tags=["papers"])
+    app.include_router(chat_router.router, prefix="/api/v1", tags=["chat"])
+    app.include_router(models_router.router, prefix="/api/v1", tags=["models"])
 
     return app
 
