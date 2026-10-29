@@ -175,7 +175,7 @@ export function Footer() {
             gap: 8,
           }}
         >
-          <span>© {new Date().getFullYear()} PaperMind AI. Open source under MIT.</span>
+          <span>© 2026 PaperMind AI. Open source under MIT.</span>
           <span>Built with Next.js, FastAPI, and Qdrant</span>
         </div>
       </div>
